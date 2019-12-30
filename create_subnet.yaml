@@ -61,3 +61,32 @@ Resources:
     Properties:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet
+  #Public Subnet用セキュリティグループ
+  SecurityGroupForPublicSubnet:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: SecurityGroupForPublicSubnet
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      VpcId: !Ref VPC
+  #Public SubnetにEC2を作成
+  EC2onPublicSubnet:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0ab3e16f9c414dee7
+      InstanceType: t2.micro
+      SubnetId: !Ref PublicSubnet
+      SecurityGroupIds:
+        - !Ref SecurityGroupForPublicSubnet
+      Tags:
+        - Key: Name
+          Value: PublicEC2
+  # ElacticIPを割り当て
+  ElasticIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: !Ref VPC
+      InstanceId: !Ref EC2onPublicSubnet
